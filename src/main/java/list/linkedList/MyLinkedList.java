@@ -32,12 +32,10 @@ public class MyLinkedList <E> implements MyList {
         if(size == 0) {
             first = last = new Node(element);
         } else {
-            final Node current = new Node(element);
-            first.setNext(last);
-            last.setPrevious(first);
-            last.setNext(current);
-            current.setPrevious(last);
-            last = current;
+            final Node node = new Node(element);
+            last.setNext(node);
+            node.setPrevious(last);
+            last = node;
         }
         size++;
         return true;
@@ -65,7 +63,7 @@ public class MyLinkedList <E> implements MyList {
         } else {
             int currentIndex = 1;
             Node currentNode = first.getNext();
-            while(index != currentIndex) {
+            while(currentIndex != index) {
                 currentNode = currentNode.getNext();
                 currentIndex++;
             }
@@ -96,6 +94,7 @@ public class MyLinkedList <E> implements MyList {
             next = new Node(arr[i]);
             currentNode.setNext(next);
             next.setPrevious(currentNode);
+            currentNode = next;
         }
         last = next;
         size += arr.length;
@@ -104,12 +103,63 @@ public class MyLinkedList <E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr, int index)  throws OutOfRangeException, IndexOutOfBoundsException {
-        return false;
+        Node start, end;
+        int currentIndex = 0;
+        if(index == size) {
+            return addAll(arr);
+        }
+        if(size + arr.length > MAX) {
+            throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
+        }
+        if(index < 0 || index > size) {
+            throw new IndexOutOfBoundsException(NONEXISTENT_INDEX);
+        }
+        if(arr.length == 0) {
+            return true;
+        }
+        end = first;
+        while(currentIndex != index) {
+            end = end.getNext();
+            currentIndex++;
+        }
+        start = end.getPrevious();
+        for(int i = arr.length - 1; i >= 0; i--) {
+            final Node node = new Node(arr[i]);
+            end.setPrevious(node);
+            node.setNext(end);
+            end = end.getPrevious();
+        }
+        if(index !=0) {
+           start.setNext(end);
+           end.setPrevious(start);
+        }
+        size += arr.length;
+        return true;
     }
 
     @Override
     public E remove(Object element) throws NoSuchElementException {
-        return null;
+        Node current = first;
+        while(!element.equals(current.getElement()) && current.getNext() != null) {
+            current = current.getNext();
+        }
+        if(element.equals(current.getElement())) {
+            if(current == first) {
+                first = first.getNext();
+                first.setPrevious(null);
+            } else if(current ==  last) {
+                last = last.getPrevious();
+                last.setNext(null);
+            } else {
+                Node previous = current.getPrevious();
+                Node next = current.getNext();
+                previous.setNext(next);
+                next.setPrevious(previous);
+            }
+            size--;
+            return (E) current.getElement();
+        }
+        throw new NoSuchElementException();
     }
 
     @Override
