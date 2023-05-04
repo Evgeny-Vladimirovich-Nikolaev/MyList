@@ -3,6 +3,7 @@ package main.java.list.linkedList;
 import main.java.list.MyList;
 import main.java.list.myListExceptions.OutOfRangeException;
 
+import java.lang.ref.PhantomReference;
 import java.util.NoSuchElementException;
 
 public class MyLinkedList <E> implements MyList {
@@ -11,8 +12,15 @@ public class MyLinkedList <E> implements MyList {
     private Node first;
     private Node last;
     private final static int MAX = 2147483647;
-    private static final String EXCEEDING_MAXIMUM_NUMBER = "Exceeding the maximum possible number of items in the MyLinkedList";
-    private static final String NONEXISTENT_INDEX = "attempt to add an element with a nonexistent index or with an index larger than the size of the MyLinkedList";
+    private static final String EXCEEDING_MAXIMUM_NUMBER
+            = "Exceeding the maximum possible number of items in the MyLinkedList";
+    private static final String ADDING_ON_NONEXISTENT_INDEX
+            = "attempt to add an element with a nonexistent index or with an index larger than the size of the MyLinkedList";
+    private static final String REMOVING_NONEXISTENT_ELEMENT = "attempt to delete a non-existent element";
+    private static final String REMOVING_ON_NONEXISTENT_INDEX
+            = "attempt to remove an element with a nonexistent index";
+    private static final String ACCESSING_A_NONEXISTENT_INDEX = "accessing a non-existent index";
+
 
     @Override
     public int size() {
@@ -47,7 +55,7 @@ public class MyLinkedList <E> implements MyList {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
         if(index < 0 || index > size) {
-            throw new IndexOutOfBoundsException(NONEXISTENT_INDEX);
+            throw new IndexOutOfBoundsException(ADDING_ON_NONEXISTENT_INDEX);
         }
         final Node node = new Node(element);
         if(size == 0) {
@@ -112,7 +120,7 @@ public class MyLinkedList <E> implements MyList {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
         if(index < 0 || index > size) {
-            throw new IndexOutOfBoundsException(NONEXISTENT_INDEX);
+            throw new IndexOutOfBoundsException(ADDING_ON_NONEXISTENT_INDEX);
         }
         if(arr.length == 0) {
             return true;
@@ -159,26 +167,80 @@ public class MyLinkedList <E> implements MyList {
             size--;
             return (E) current.getElement();
         }
-        throw new NoSuchElementException();
+        throw new NoSuchElementException(REMOVING_NONEXISTENT_ELEMENT);
     }
 
     @Override
     public E remove(int index) throws IndexOutOfBoundsException {
-        return null;
+        Node currentNode;
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(REMOVING_ON_NONEXISTENT_INDEX);
+        }
+        if(index == 0) {
+            currentNode = first;
+            first = first.getNext();
+            first.setPrevious(null);
+        } else if(index == size - 1) {
+            currentNode = last;
+            last = last.getPrevious();
+            last.setNext(null);
+        } else {
+            int currentIndex = 1;
+            currentNode = first.getNext();
+            while(currentIndex != index) {
+                currentNode = currentNode.getNext();
+                currentIndex++;
+            }
+            Node previous = currentNode.getPrevious();
+            Node next = currentNode.getNext();
+            previous.setNext(next);
+            next.setPrevious(previous);
+        }
+        size--;
+        return (E) currentNode.getElement();
     }
 
     @Override
     public boolean removeAll() {
-        return false;
+        first = last = null;
+        size = 0;
+        return true;
     }
 
     @Override
     public boolean set(Object element, int index) throws IndexOutOfBoundsException {
-        return false;
+        int currentIndex = 0;
+        Node currentNode = first;
+        E e = null;
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(ACCESSING_A_NONEXISTENT_INDEX);
+        }
+        try {
+            e = (E) element;
+        } catch (ClassCastException ex) {
+            System.out.println(ex.getMessage());
+        }
+        while(currentIndex != index) {
+            currentNode = currentNode.getNext();
+            currentIndex++;
+        }
+        currentNode.setElement(e);
+        return true;
     }
 
     @Override
     public boolean contains(Object element) {
+        Node currentNode = first;
+        if(size == 0) {
+            return false;
+        }
+        do {
+            if(element.equals(currentNode.getElement())) {
+                return true;
+            }
+        } while (currentNode.getNext() != null);{
+                currentNode = currentNode.getNext();
+            }
         return false;
     }
 
