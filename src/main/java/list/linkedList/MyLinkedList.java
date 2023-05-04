@@ -245,8 +245,17 @@ public class MyLinkedList <E> implements MyList {
     }
 
     @Override
-    public Object get(int index) throws IndexOutOfBoundsException {
-        return null;
+    public E get(int index) throws IndexOutOfBoundsException {
+        int currentIndex = 0;
+        Node currentNode = first;
+        if(index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(ACCESSING_A_NONEXISTENT_INDEX);
+        }
+        while(currentIndex != index) {
+            currentNode = currentNode.getNext();
+            currentIndex++;
+        }
+        return (E) currentNode.getElement();
     }
 
     @Override
