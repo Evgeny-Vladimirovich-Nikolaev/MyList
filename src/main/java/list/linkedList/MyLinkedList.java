@@ -88,16 +88,19 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr) throws OutOfRangeException {
+        Node currentNode;
         if (size + arr.length > MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
         if (arr.length == 0) {
             return true;
         }
+        currentNode = new Node(arr[0]);
         if (size == 0) {
-            last = first = new Node(arr[0]);
+            first = currentNode;
+        } else {
+            last.setNext(currentNode);
         }
-        Node currentNode = last;
         Node next = null;
         for (int i = 1; i < arr.length; i++) {
             next = new Node(arr[i]);
@@ -112,7 +115,7 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr, int index) throws OutOfRangeException, IndexOutOfBoundsException {
-        Node start, end;
+        Node end, currentNode;
         int currentIndex = 0;
         if (index == size) {
             return addAll(arr);
@@ -126,23 +129,26 @@ public class MyLinkedList<E> implements MyList {
         if (arr.length == 0) {
             return true;
         }
-        end = first;
-        while (currentIndex != index) {
-            end = end.getNext();
-            currentIndex++;
+        currentNode = first;
+        if(index == 0) {
+            for(int i = arr.length - 1; i >= 0; i--) {
+                currentNode.setPrevious(new Node(arr[i]));
+                currentNode.getPrevious().setNext(currentNode);
+                currentNode = currentNode.getPrevious();
+            }
+            first = currentNode;
+        } else {
+            while(currentIndex < index - 1) {
+                currentNode = currentNode.getNext();
+                currentIndex++;
+            }
+            end = currentNode.getNext();
+            for(int i = 0; i < arr.length; i++) {
+                currentNode.setNext(new Node(arr[i]));
+                currentNode = currentNode.getNext();
+            }
+            currentNode.setNext(end);
         }
-        start = end.getPrevious();
-        for (int i = arr.length - 1; i >= 0; i--) {
-            final Node node = new Node(arr[i]);
-            end.setPrevious(node);
-            node.setNext(end);
-            end = end.getPrevious();
-        }
-        if (index != 0) {
-            start.setNext(end);
-            end.setPrevious(start);
-        }
-        size += arr.length;
         return true;
     }
 
@@ -156,7 +162,9 @@ public class MyLinkedList<E> implements MyList {
             if (currentNode == first) {
                 first.setElement(null);
                 first = first.getNext();
-                first.setPrevious(null);
+                if(size > 1) {
+                    first.setPrevious(null);
+                }
             } else if (currentNode == last) {
                 last.setElement(null);
                 last = last.getPrevious();
@@ -185,7 +193,9 @@ public class MyLinkedList<E> implements MyList {
             element = (E) first.getElement();
             first.setElement(null);
             first = first.getNext();
-            first.setPrevious(null);
+            if(size > 1) {
+                first.setPrevious(null);
+            }
         } else if (index == size - 1) {
             element = (E) last.getElement();
             last.setElement(null);
