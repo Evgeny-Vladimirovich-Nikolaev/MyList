@@ -34,7 +34,6 @@ public class MyArrayList<E> implements MyList {
     public MyArrayList(E[] array) {
         this.array = array;
         size = capacity = array.length;
-
     }
 
     @Override
@@ -85,7 +84,22 @@ public class MyArrayList<E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr) throws OutOfRangeException {
-        return false;
+        if(array.length + arr.length > MAX) {
+            throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
+        }
+        if(size == 0) {
+            this.array = (E[]) arr;
+        } else {
+            array = Arrays.copyOf(array, array.length + arr.length);
+            for(int i = 0; i < arr.length; i++) {
+                array[size + i] = (E) arr[i];
+            }
+        }
+        size += arr.length;
+        if(capacity < size) {
+            capacity = size;
+        }
+        return true;
     }
 
     @Override
