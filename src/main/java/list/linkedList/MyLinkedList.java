@@ -1,6 +1,7 @@
 package main.java.list.linkedList;
 
 import main.java.list.MyList;
+import main.java.list.arrayList.MyArrayList;
 import main.java.list.myListExceptions.OutOfRangeException;
 
 import java.util.List;
@@ -38,10 +39,10 @@ public class MyLinkedList<E> implements MyList {
         if (size == MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
+        final Node node = new Node(element);
         if (size == 0) {
-            first = last = new Node(element);
+            first = last = node;
         } else {
-            final Node node = new Node(element);
             last.setNext(node);
             node.setPrevious(last);
             last = node;
@@ -88,14 +89,13 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr) throws OutOfRangeException {
-        Node currentNode;
         if (size + arr.length > MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
         if (arr.length == 0) {
             return true;
         }
-        currentNode = new Node(arr[0]);
+        Node currentNode = new Node(arr[0]);
         if (size == 0) {
             first = currentNode;
         } else {
@@ -334,25 +334,25 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean retainAll(Object[] arr) {
-        List list;
+        MyList list;
         Node currentNode;
         if (size == 0) {
             return false;
         }
-        list = List.of(arr);
+        list = new MyArrayList(arr);
         currentNode = first;
-        for (Object ob : list) {
-            if (ob.equals(first.getElement())) {
-                list.remove(ob);
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(first.getElement())) {
+                list.remove(i);
                 continue;
             }
         }
         while (currentNode.hasNext()) {
             boolean isMissing = true;
             currentNode = currentNode.getNext();
-            for (Object ob : list) {
-                if (ob.equals(currentNode.getElement())) {
-                    list.remove(ob);
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).equals(currentNode.getElement())) {
+                    list.remove(list.get(i));
                     isMissing = false;
                     break;
                 }
