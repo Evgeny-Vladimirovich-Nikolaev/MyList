@@ -8,10 +8,13 @@ public interface MyList <E> {
 
     int size();
     boolean isEmpty();
+    E first();
+    E last();
     boolean add(E element) throws OutOfRangeException;
     boolean add(E element, int index)throws OutOfRangeException, IndexOutOfBoundsException;
     boolean addAll(E[] arr)throws OutOfRangeException;
     boolean addAll(E[] arr, int index)throws OutOfRangeException, IndexOutOfBoundsException;
+    boolean addAll(MyList list) throws UnsupportedOperationException;
     boolean remove(E element) throws NoSuchElementException;
     E remove(int index)throws IndexOutOfBoundsException;
     boolean removeAll();

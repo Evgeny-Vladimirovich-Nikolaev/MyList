@@ -7,29 +7,14 @@ public class Main {
 
     public static void main(String[] args) {
 
-        MyList<Integer> list = new MyArrayList<>();
-
+        MyList<Integer> list = new MyLinkedList();
+        MyList<Integer> extra = new MyArrayList();
+        list.addAll(new Integer[]{0, 1, 2, 3, 4});
+        System.out.println(list);
+        extra.addAll(new Integer[]{5, 6, 7, 8, 9});
+        System.out.println(extra);
+        list.addAll(extra);
         System.out.println(list);
 
-        list.add(1);
-
-        System.out.println(list);
-
-        list.add(0, 0);
-
-        System.out.println(list);
-
-        list.addAll(new Integer[] {2, 3, 4, 5});
-
-        System.out.println(list);
-
-        list.remove(3);
-        System.out.println(list);
-
-        list.retain(2);
-        System.out.println(list);
-
-        list.remove((Integer)3);
-        System.out.println(list);
     }
 }

@@ -4,7 +4,6 @@ import main.java.list.MyList;
 import main.java.list.arrayList.MyArrayList;
 import main.java.list.myListExceptions.OutOfRangeException;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class MyLinkedList<E> implements MyList {
@@ -12,6 +11,8 @@ public class MyLinkedList<E> implements MyList {
     private int size;
     private Node first;
     private Node last;
+
+    private Node current = first;
     private final static int MAX = 2147483647;
     private static final String EXCEEDING_MAXIMUM_NUMBER
             = "Exceeding the maximum possible number of items in the MyLinkedList";
@@ -32,6 +33,54 @@ public class MyLinkedList<E> implements MyList {
     @Override
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    @Override
+    public E first() {
+        current = first;
+        return (E) current.getElement();
+    }
+
+    public void setFirst(E element) {
+        first.setElement(element);
+    }
+
+    @Override
+    public E last() {
+        current = last;
+        return (E) current.getElement();
+    }
+
+    public void setLast(E element) {
+        last.setElement(element);
+    }
+
+    public E current() {
+        return (E) current.getElement();
+    }
+
+    public boolean hasNext() {
+        return current.hasNext();
+    }
+
+    public E getNext() {
+        if(current.hasNext()) {
+            current = current.getNext();
+            return (E) current.getElement();
+        }
+        return null;
+    }
+
+    public boolean hasPrevious() {
+        return current.hasPrevious();
+    }
+
+    public E getPrevious() {
+        if(current.hasPrevious()) {
+            current = current.getPrevious();
+            return (E) current.getElement();
+        }
+        return null;
     }
 
     @Override
@@ -72,16 +121,16 @@ public class MyLinkedList<E> implements MyList {
             last = node;
         } else {
             int currentIndex = 1;
-            Node currentNode = first.getNext();
+            Node temp = first.getNext();
             while (currentIndex != index) {
-                currentNode = currentNode.getNext();
+                temp = temp.getNext();
                 currentIndex++;
             }
-            final Node previous = currentNode.getPrevious();
+            final Node previous = temp.getPrevious();
             previous.setNext(node);
             node.setPrevious(previous);
-            node.setNext(currentNode);
-            currentNode.setPrevious(node);
+            node.setNext(temp);
+            temp.setPrevious(node);
         }
         size++;
         return true;
@@ -95,18 +144,18 @@ public class MyLinkedList<E> implements MyList {
         if (arr.length == 0) {
             return true;
         }
-        Node currentNode = new Node(arr[0]);
+        Node temp = new Node(arr[0]);
         if (size == 0) {
-            first = currentNode;
+            first = temp;
         } else {
-            last.setNext(currentNode);
+            last.setNext(temp);
         }
         Node next = null;
         for (int i = 1; i < arr.length; i++) {
             next = new Node(arr[i]);
-            currentNode.setNext(next);
-            next.setPrevious(currentNode);
-            currentNode = next;
+            temp.setNext(next);
+            next.setPrevious(temp);
+            temp = next;
         }
         last = next;
         size += arr.length;
@@ -115,7 +164,7 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean addAll(Object[] arr, int index) throws OutOfRangeException, IndexOutOfBoundsException {
-        Node end, currentNode;
+        Node end, temp;
         int currentIndex = 0;
         if (index == size) {
             return addAll(arr);
@@ -129,54 +178,73 @@ public class MyLinkedList<E> implements MyList {
         if (arr.length == 0) {
             return true;
         }
-        currentNode = first;
-        if(index == 0) {
-            for(int i = arr.length - 1; i >= 0; i--) {
-                currentNode.setPrevious(new Node(arr[i]));
-                currentNode.getPrevious().setNext(currentNode);
-                currentNode = currentNode.getPrevious();
+        temp = first;
+        if (index == 0) {
+            for (int i = arr.length - 1; i >= 0; i--) {
+                temp.setPrevious(new Node(arr[i]));
+                temp.getPrevious().setNext(temp);
+                temp = temp.getPrevious();
             }
-            first = currentNode;
+            first = temp;
         } else {
-            while(currentIndex < index - 1) {
-                currentNode = currentNode.getNext();
+            while (currentIndex < index - 1) {
+                temp = temp.getNext();
                 currentIndex++;
             }
-            end = currentNode.getNext();
-            for(int i = 0; i < arr.length; i++) {
-                currentNode.setNext(new Node(arr[i]));
-                currentNode = currentNode.getNext();
+            end = temp.getNext();
+            for (int i = 0; i < arr.length; i++) {
+                temp.setNext(new Node(arr[i]));
+                temp = temp.getNext();
             }
-            currentNode.setNext(end);
+            temp.setNext(end);
         }
         return true;
     }
 
     @Override
-    public boolean remove(Object element) throws NoSuchElementException {
-        Node currentNode = first;
-        while (!element.equals(currentNode.getElement()) && currentNode.hasNext()) {
-            currentNode = currentNode.getNext();
+    public boolean addAll(MyList list) {
+        if(list instanceof MyArrayList<?>) {
+            for(int i = 0; i < list.size(); i++) {
+                this.add(list.get(i));
+            }
+            return true;
+        } else if (list instanceof MyLinkedList<?>) {
+            list = (MyLinkedList<E>) list;
+            Node temp = ((MyLinkedList<?>) list).first;
+            while(temp != null) {
+                this.add(temp.getElement());
+                temp = temp.getNext();
+            }
+            return true;
         }
-        if (element.equals(currentNode.getElement())) {
-            if (currentNode == first) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean remove(Object element) throws NoSuchElementException {
+        Node temp = first;
+        while (!element.equals(temp.getElement()) && temp.hasNext()) {
+            temp = temp.getNext();
+        }
+        if (element.equals(temp.getElement())) {
+            if (temp == first) {
                 first.setElement(null);
                 first = first.getNext();
-                if(size > 1) {
+                if (size > 1) {
                     first.setPrevious(null);
                 }
-            } else if (currentNode == last) {
+            } else if (temp == last) {
                 last.setElement(null);
                 last = last.getPrevious();
                 last.setNext(null);
             } else {
-                Node previous = currentNode.getPrevious();
-                Node next = currentNode.getNext();
+                Node previous = temp.getPrevious();
+                Node next = temp.getNext();
                 previous.setNext(next);
                 next.setPrevious(previous);
             }
-            currentNode.setElement(null);
-            currentNode = null;
+            temp.setElement(null);
+            temp = null;
             size--;
             return true;
         }
@@ -193,7 +261,7 @@ public class MyLinkedList<E> implements MyList {
             element = (E) first.getElement();
             first.setElement(null);
             first = first.getNext();
-            if(size > 1) {
+            if (size > 1) {
                 first.setPrevious(null);
             }
         } else if (index == size - 1) {
@@ -203,16 +271,16 @@ public class MyLinkedList<E> implements MyList {
             last.setNext(null);
         } else {
             int currentIndex = 1;
-            Node currentNode = first.getNext();
+            Node temp = first.getNext();
             while (currentIndex != index) {
-                currentNode = currentNode.getNext();
+                temp = temp.getNext();
                 currentIndex++;
             }
-            element = (E) currentNode.getElement();
-            Node previous = currentNode.getPrevious();
-            Node next = currentNode.getNext();
-            currentNode.setElement(null);
-            currentNode = null;
+            element = (E) temp.getElement();
+            Node previous = temp.getPrevious();
+            Node next = temp.getNext();
+            temp.setElement(null);
+            temp = null;
             previous.setNext(next);
             next.setPrevious(previous);
         }
@@ -226,11 +294,11 @@ public class MyLinkedList<E> implements MyList {
         if (first == null) {
             return true;
         }
-        Node currentNode = first;
+        Node temp = first;
         do {
-            currentNode.setElement(null);
-            currentNode = currentNode.getNext();
-        } while (currentNode != null && currentNode.hasNext());
+            temp.setElement(null);
+            temp = temp.getNext();
+        } while (temp != null && temp.hasNext());
         first = last = null;
         size = 0;
         return true;
@@ -239,7 +307,7 @@ public class MyLinkedList<E> implements MyList {
     @Override
     public boolean set(Object element, int index) throws IndexOutOfBoundsException {
         int currentIndex = 0;
-        Node currentNode = first;
+        Node temp = first;
         E e = null;
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(ACCESSING_A_NONEXISTENT_INDEX);
@@ -250,10 +318,10 @@ public class MyLinkedList<E> implements MyList {
             System.out.println(ex.getMessage());
         }
         while (currentIndex != index) {
-            currentNode = currentNode.getNext();
+            temp = temp.getNext();
             currentIndex++;
         }
-        currentNode.setElement(e);
+        temp.setElement(e);
         return true;
     }
 
@@ -262,13 +330,13 @@ public class MyLinkedList<E> implements MyList {
         if (size == 0) {
             return false;
         }
-        Node currentNode = first;
+        Node temp = first;
         E e = (E) element;
-        while(currentNode != null) {
-            if(currentNode.getElement().equals(e)) {
+        while (temp != null) {
+            if (temp.getElement().equals(e)) {
                 return true;
             }
-            currentNode = currentNode.getNext();
+            temp = temp.getNext();
         }
         return false;
     }
@@ -276,32 +344,32 @@ public class MyLinkedList<E> implements MyList {
     @Override
     public E get(int index) throws IndexOutOfBoundsException {
         int currentIndex = 0;
-        Node currentNode = first;
+        Node temp = first;
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(ACCESSING_A_NONEXISTENT_INDEX);
         }
         while (currentIndex != index) {
-            currentNode = currentNode.getNext();
+            temp = temp.getNext();
             currentIndex++;
         }
-        return (E) currentNode.getElement();
+        return (E) temp.getElement();
     }
 
     @Override
     public int getIndexOf(Object element) throws NoSuchElementException {
         int currentIndex = 0;
-        Node currentNode;
+        Node temp;
         if (size == 0) {
             throw new NoSuchElementException(ELEMENT_IS_MISSING);
         }
         if (element.equals(first.getElement())) {
             return 0;
         }
-        currentNode = first;
-        while (currentNode.hasNext()) {
-            currentNode = currentNode.getNext();
+        temp = first;
+        while (temp.hasNext()) {
+            temp = temp.getNext();
             currentIndex++;
-            if (element.equals(currentNode.getElement())) {
+            if (element.equals(temp.getElement())) {
                 return currentIndex;
             }
         }
@@ -310,76 +378,31 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean retain(Object element) {
-        Node currentNode;
-        if (size == 0) {
-            return false;
-        }
-        if (element.equals(first.getElement())) {
-            first.setNext(null);
-            last = first;
-            return true;
-        }
-        currentNode = first;
-        while (currentNode.hasNext()) {
-            currentNode = currentNode.getNext();
-            if (element.equals(currentNode.getElement())) {
-                currentNode.setPrevious(null);
-                currentNode.setNext(null);
-                first = last = currentNode;
-                return true;
-            }
-        }
-        return false;
+        this.removeAll();
+        this.add(element);
+        return true;
     }
 
     @Override
     public boolean retainAll(Object[] arr) {
-        MyList list;
-        Node currentNode;
-        if (size == 0) {
-            return false;
-        }
-        list = new MyArrayList(arr);
-        currentNode = first;
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals(first.getElement())) {
-                list.remove(i);
-                continue;
-            }
-        }
-        while (currentNode.hasNext()) {
-            boolean isMissing = true;
-            currentNode = currentNode.getNext();
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).equals(currentNode.getElement())) {
-                    list.remove(list.get(i));
-                    isMissing = false;
-                    break;
-                }
-            }
-            if (isMissing) {
-                Node previous = currentNode.getPrevious();
-                Node next = currentNode.getNext();
-                previous.setNext(next);
-                previous.setPrevious(previous);
-            }
-        }
-        return list.isEmpty();
+        this.removeAll();
+        this.addAll(arr);
+        return true;
     }
 
     private boolean equalNodes(MyLinkedList list) {
-        if(this.size != list.size) {
+        if (this.size != list.size) {
             return false;
         }
         Node thisNode = this.first;
         Node listNode = list.first;
         do {
-            if(!thisNode.equals(listNode)) {
+            if (!thisNode.equals(listNode)) {
                 return false;
             }
             thisNode = thisNode.getNext();
             listNode = listNode.getNext();
-        } while(thisNode != null);
+        } while (thisNode != null);
         return true;
     }
 
@@ -397,7 +420,7 @@ public class MyLinkedList<E> implements MyList {
             return false;
         }
         MyLinkedList list = (MyLinkedList) obj;
-        if(this.hashCode() != list.hashCode()) {
+        if (this.hashCode() != list.hashCode()) {
             return false;
         }
         if (!first.equals(list.first) || !last.equals(list.last)) {
@@ -409,13 +432,13 @@ public class MyLinkedList<E> implements MyList {
     @Override
     public String toString() {
         String s = "[";
-        Node currentNode = first;
-        while(currentNode != null) {
-            s = s + '[' + currentNode + ']';
-            if(currentNode.getNext() == null) {
+        Node temp = first;
+        while (temp != null) {
+            s = s + '[' + temp + ']';
+            if (temp.getNext() == null) {
                 break;
             }
-            currentNode = currentNode.getNext();
+            temp = temp.getNext();
             s = s + ", ";
         }
         return s + ']';
@@ -466,7 +489,7 @@ class Node<E> {
 
     @Override
     public int hashCode() {
-        if(element != null) {
+        if (element != null) {
             return element.hashCode();
         }
         return 31;
@@ -474,14 +497,14 @@ class Node<E> {
 
     @Override
     public boolean equals(Object obj) {
-        if(this == obj) {
+        if (this == obj) {
             return true;
         }
-        if(!(obj instanceof Node)) {
+        if (!(obj instanceof Node)) {
             return false;
         }
         Node node = (Node) obj;
-        if(this.hashCode() != obj.hashCode()) {
+        if (this.hashCode() != obj.hashCode()) {
             return false;
         }
         return this.element.equals(((Node<?>) obj).element);
@@ -492,3 +515,4 @@ class Node<E> {
         return element.toString();
     }
 }
+

@@ -1,6 +1,7 @@
 package main.java.list.arrayList;
 
 import main.java.list.MyList;
+import main.java.list.linkedList.MyLinkedList;
 import main.java.list.myListExceptions.OutOfRangeException;
 
 import java.util.Arrays;
@@ -24,10 +25,12 @@ public class MyArrayList<E> implements MyList {
     private static String ELEMENT_IS_MISSING = "the element is missing in the MyArrayList";
 
     public MyArrayList() {
+        this.capacity = 10;
         this.array = (E[]) new Object[10];
     }
 
     public MyArrayList(int capacity) {
+        this.capacity = capacity;
         this.array = (E[]) new Object[capacity];
     }
 
@@ -46,8 +49,19 @@ public class MyArrayList<E> implements MyList {
         return size == 0;
     }
 
+    @Override
+    public E first() {
+        return this.get(0);
+    }
+
+    @Override
+    public E last() {
+        return this.get(size - 1);
+    }
+
+
     public int capacity() {
-        return capacity;
+        return array.length;
     }
 
     @Override
@@ -55,7 +69,7 @@ public class MyArrayList<E> implements MyList {
         if (size == MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
-        if (size >= capacity) {
+        if (size == capacity) {
             increaseArray();
         }
         array[size++] = (E) element;
@@ -90,26 +104,81 @@ public class MyArrayList<E> implements MyList {
         if(size == 0) {
             this.array = (E[]) arr;
         } else {
-            array = Arrays.copyOf(array, array.length + arr.length);
+            if(capacity < size + arr.length) {
+                array = Arrays.copyOf(array, array.length + arr.length);
+            }
             for(int i = 0; i < arr.length; i++) {
                 array[size + i] = (E) arr[i];
             }
         }
         size += arr.length;
-        if(capacity < size) {
-            capacity = size;
-        }
+        capacity = array.length;
         return true;
     }
 
     @Override
     public boolean addAll(Object[] arr, int index) throws OutOfRangeException, IndexOutOfBoundsException {
-        return false;
+        if(index == size) {
+            return addAll(arr);
+        }
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException(ADDING_ON_NONEXISTENT_INDEX);
+        }
+        if (size + arr.length >= MAX) {
+            throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
+        }
+        if(size == 0) {
+            this.array = (E[]) arr;
+        } else {
+            if(capacity < size + arr.length) {
+                array = Arrays.copyOf(array, array.length + arr.length);
+                capacity = size + arr.length;
+            }
+            for(int i = size - 1; i >= index; i--) {
+                array[i + arr.length] = array[i];
+            }
+            for(int i = 0; i < arr.length; i++) {
+                array[index + i] = (E) arr[i];
+            }
+        }
+        size += arr.length;
+        return true;
+    }
+
+    @Override
+    public boolean addAll(MyList list) {
+        if(list instanceof MyArrayList<?>) {
+            for(int i = 0; i < list.size(); i++) {
+                this.add(list.get(i));
+            }
+            return true;
+        }
+        if(list instanceof MyLinkedList) {
+            if(((MyLinkedList) list).first() != null) {
+                this.add(((MyLinkedList) list).current());
+            }
+            while(((MyLinkedList<?>) list).hasNext()) {
+                this.add(((MyLinkedList<?>) list).getNext());
+            }
+            return true;
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean remove(Object element) throws NoSuchElementException {
-        return false;
+        int index = 0;
+        while(index < size) {
+            if(element.equals(array[index])) {
+                for(int i = index; i < size - 1; i++) {
+                    array[i] = array[++i];
+                }
+                array[--size] = null;
+                return true;
+            }
+            index++;
+        }
+        throw new NoSuchElementException(REMOVING_NONEXISTENT_ELEMENT);
     }
 
     @Override
