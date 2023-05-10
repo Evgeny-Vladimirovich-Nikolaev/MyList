@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 public class MyArrayList<E> implements MyList {
 
     private int size = 0;
-    private int capacity;
+    //private int capacity;
     private E[] array;
 
     private final static int MAX = 2147483647;
@@ -25,18 +25,16 @@ public class MyArrayList<E> implements MyList {
     private static String ELEMENT_IS_MISSING = "the element is missing in the MyArrayList";
 
     public MyArrayList() {
-        this.capacity = 10;
         this.array = (E[]) new Object[10];
     }
 
     public MyArrayList(int capacity) {
-        this.capacity = capacity;
         this.array = (E[]) new Object[capacity];
     }
 
     public MyArrayList(E[] array) {
         this.array = array;
-        size = capacity = array.length;
+        size = array.length;
     }
 
     @Override
@@ -69,7 +67,7 @@ public class MyArrayList<E> implements MyList {
         if (size == MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
-        if (size == capacity) {
+        if (size == array.length) {
             increaseArray();
         }
         array[size++] = (E) element;
@@ -84,7 +82,7 @@ public class MyArrayList<E> implements MyList {
         if (size == MAX) {
             throw new OutOfRangeException(EXCEEDING_MAXIMUM_NUMBER);
         }
-        if (size >= capacity) {
+        if (size >= array.length) {
             increaseArray();
         }
         int currentIndex = size;
@@ -104,7 +102,7 @@ public class MyArrayList<E> implements MyList {
         if(size == 0) {
             this.array = (E[]) arr;
         } else {
-            if(capacity < size + arr.length) {
+            if(array.length < size + arr.length) {
                 array = Arrays.copyOf(array, array.length + arr.length);
             }
             for(int i = 0; i < arr.length; i++) {
@@ -112,7 +110,6 @@ public class MyArrayList<E> implements MyList {
             }
         }
         size += arr.length;
-        capacity = array.length;
         return true;
     }
 
@@ -130,9 +127,8 @@ public class MyArrayList<E> implements MyList {
         if(size == 0) {
             this.array = (E[]) arr;
         } else {
-            if(capacity < size + arr.length) {
+            if(array.length < size + arr.length) {
                 array = Arrays.copyOf(array, array.length + arr.length);
-                capacity = size + arr.length;
             }
             for(int i = size - 1; i >= index; i--) {
                 array[i + arr.length] = array[i];
@@ -209,7 +205,6 @@ public class MyArrayList<E> implements MyList {
             array[i] = null;
         }
         size = 0;
-        capacity = 10;
         array = (E[]) new Object[0];
     }
 
@@ -238,25 +233,50 @@ public class MyArrayList<E> implements MyList {
 
     @Override
     public boolean retain(Object element) {
-        return false;
+        if(size == 0){
+            return false;
+        }
+        for(int i = size -1; i >= 0; i--) {
+            if(element.equals(array[i])) {
+                continue;
+            }
+            this.remove(i);
+        }
+        return true;
     }
 
     @Override
     public boolean retainAll(Object[] arr) {
-        return false;
+        if(size == 0) {
+            return false;
+        }
+        for(int i = size - 1; i >= 0; i--) {
+            for(int j = 0; j < arr.length; j++) {
+                if(arr[j].equals(this.get(i))) {
+                    System.out.println("!!!!!!! " + this.get(i) + " !!!!!!!");
+                    break;
+                }
+                System.out.println("before " + i);
+                this.remove(i--);
+                System.out.println("after " + i);
+                System.out.println("-----------------------------------");
+            }
+        }
+        return true;
     }
 
     private void increaseArray() {
-        if (capacity < 1431655765) {
-            if (capacity < 3) {
-                capacity++;
+        int length = array.length;
+        if (length < 1431655765) {
+            if (length < 3) {
+                length++;
             } else {
-                capacity = capacity / 2 * 3 + 1;
+                length = length / 2 * 3 + 1;
             }
         } else {
-            capacity = MAX;
+            length = MAX;
         }
-        array = Arrays.copyOf(array, capacity);
+        array = Arrays.copyOf(array, length);
     }
 
     @Override
