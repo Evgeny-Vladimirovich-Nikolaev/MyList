@@ -251,15 +251,15 @@ public class MyArrayList<E> implements MyList {
             return false;
         }
         for(int i = size - 1; i >= 0; i--) {
+            boolean isPresent = false;
             for(int j = 0; j < arr.length; j++) {
                 if(arr[j].equals(this.get(i))) {
-                    System.out.println("!!!!!!! " + this.get(i) + " !!!!!!!");
+                    isPresent = true;
                     break;
                 }
-                System.out.println("before " + i);
-                this.remove(i--);
-                System.out.println("after " + i);
-                System.out.println("-----------------------------------");
+            }
+            if(!isPresent) {
+                this.remove(i);
             }
         }
         return true;

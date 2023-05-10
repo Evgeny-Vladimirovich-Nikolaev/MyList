@@ -378,8 +378,49 @@ public class MyLinkedList<E> implements MyList {
 
     @Override
     public boolean retain(Object element) {
-        this.removeAll();
-        this.add(element);
+        if(size == 0) {
+            return false;
+        }
+        if(element.equals(first.getElement())) {
+            Node currentNode = first.getNext();
+            while(currentNode != null) {
+                currentNode.getPrevious().setNext(null);
+                currentNode.setPrevious(null);
+                currentNode.setElement(null);
+                currentNode = currentNode.getNext();
+            }
+            last = first;
+        }else if(element.equals(last.getElement())) {
+            Node currentNode = last.getPrevious();
+            while(currentNode != null) {
+                currentNode.getNext().setPrevious(null);
+                currentNode.setNext(null);
+                currentNode.setElement(null);
+                currentNode = currentNode.getPrevious();
+            }
+            first = last;
+        } else {
+            Node currentNode = first;
+            while(currentNode.hasNext()) {
+                currentNode.setElement(null);
+                currentNode.setPrevious(null);
+                currentNode = currentNode.getNext();
+                currentNode.getPrevious().setNext(null);
+                currentNode.setPrevious(null);
+                if(element.equals(currentNode.getElement())) {
+                    first = currentNode;
+                    break;
+                }
+            }
+            currentNode = first.getNext();
+            while(currentNode != null) {
+                currentNode.getPrevious().setNext(null);
+                currentNode.setPrevious(null);
+                currentNode.setElement(null);
+                currentNode = currentNode.getNext();
+            }
+            last = first;
+        }
         return true;
     }
 

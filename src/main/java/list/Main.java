@@ -13,7 +13,7 @@ public class Main {
 
         MyArrayList list1 = new MyArrayList(new Object[]{1, 2, 3, 4, 5, 5, 5, 5, 6, 6, 7, 8, 9});
         System.out.println(list1);
-        System.out.println(list1.retainAll(new Object[]{4, 5, 6, "seven"}));
+        System.out.println(list1.retainAll(new Object[]{1, 4, 5, 6, "seven", 9}));
         System.out.println(list1);
     }
 
